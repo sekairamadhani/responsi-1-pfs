@@ -1,7 +1,7 @@
 import React from "react";
-import { Button, Card, Badge, Row, Col } from "react-bootstrap";
+import { Button, Table, Badge } from "react-bootstrap";
 
-const TaskList = ({ tasks, deleteTask, showEditForm }) => {
+const TaskList = ({ tasks, confirmDelete, showEditForm }) => {
   if (tasks.length === 0) {
     return (
       <p className="text-muted text-center mt-4">
@@ -37,23 +37,33 @@ const TaskList = ({ tasks, deleteTask, showEditForm }) => {
   };
 
   return (
-    <Row>
-      {tasks.map((task) => (
-        <Col md={4} key={task.id} className="mb-3">
-          <Card className="shadow-sm h-100 border-0">
-            <Card.Body className="d-flex flex-column justify-content-between">
-              <div>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Badge bg={getPriorityBadge(task.priority)}>
-                    {task.priority}
-                  </Badge>
-                  <Badge bg={getStatusBadge(task.status)}>{task.status}</Badge>
-                </div>
-                <Card.Title className="h5 text-dark mb-3">
-                  {task.name}
-                </Card.Title>
-              </div>
-              <div className="d-flex justify-content-end mt-3">
+    <div className="table-responsive shadow-sm bg-white rounded p-3">
+      <Table striped bordered hover align="middle">
+        <thead className="table-dark">
+          <tr>
+            <th style={{ width: "5%" }}>No</th>
+            <th style={{ width: "45%" }}>Nama Tugas</th>
+            <th style={{ width: "15%" }}>Prioritas</th>
+            <th style={{ width: "15%" }}>Status</th>
+            <th style={{ width: "20%" }} className="text-center">
+              Aksi
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {tasks.map((task, index) => (
+            <tr key={task.id}>
+              <td>{index + 1}</td>
+              <td className="fw-semibold">{task.name}</td>
+              <td>
+                <Badge bg={getPriorityBadge(task.priority)}>
+                  {task.priority}
+                </Badge>
+              </td>
+              <td>
+                <Badge bg={getStatusBadge(task.status)}>{task.status}</Badge>
+              </td>
+              <td className="text-center">
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -65,16 +75,16 @@ const TaskList = ({ tasks, deleteTask, showEditForm }) => {
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => confirmDelete(task)}
                 >
                   Hapus
                 </Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      ))}
-    </Row>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
   );
 };
 

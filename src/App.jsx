@@ -1,26 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Button, Navbar } from "react-bootstrap";
 import TaskList from "./components/TaskList";
 import TaskForm from "./components/TaskForm";
+import DeleteConfirmModal from "./components/DeleteConfirmModal";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      name: "Analisis Kebutuhan Sistem RME",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: 2,
-      name: "Desain Antarmuka Dashboard",
-      priority: "Medium",
-      status: "To Do",
-    },
-  ]);
+  // Menggunakan localStorage agar data tidak hilang/error saat di-refresh
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem("tasks_tim");
+    if (savedTasks) {
+      try {
+        return JSON.parse(savedTasks);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [
+      {
+        id: 1,
+        name: "Analisis Kebutuhan Sistem RME",
+        priority: "High",
+        status: "In Progress",
+      },
+      {
+        id: 2,
+        name: "Desain Antarmuka Dashboard",
+        priority: "Medium",
+        status: "To Do",
+      },
+    ];
+  });
+
   const [showForm, setShowForm] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
+
+  // State untuk Modal Konfirmasi Hapus
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("tasks_tim", JSON.stringify(tasks));
+  }, [tasks]);
 
   const handleShowForm = () => setShowForm(true);
   const handleCloseForm = () => {
@@ -36,8 +57,23 @@ function App() {
     setTasks(tasks.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((t) => t.id !== id));
+  // Fungsi untuk memicu modal konfirmasi hapus
+  const confirmDelete = (task) => {
+    setTaskToDelete(task);
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setTaskToDelete(null);
+  };
+
+  // Eksekusi hapus setelah klik "Ya"
+  const executeDelete = () => {
+    if (taskToDelete) {
+      setTasks(tasks.filter((t) => t.id !== taskToDelete.id));
+    }
+    handleCloseDeleteModal();
   };
 
   const showEditForm = (task) => {
@@ -50,7 +86,7 @@ function App() {
       <Navbar bg="dark" variant="dark" className="mb-4 shadow-sm">
         <Container>
           <Navbar.Brand href="#home">
-             Dashboard Task Manager Tim
+            🚀 Dashboard Task Manager Tim
           </Navbar.Brand>
           <span className="text-white-50 small">
             Sekai Putri Ramadhani (2511501026)
@@ -68,7 +104,7 @@ function App() {
 
         <TaskList
           tasks={tasks}
-          deleteTask={deleteTask}
+          confirmDelete={confirmDelete}
           showEditForm={showEditForm}
         />
 
@@ -78,6 +114,13 @@ function App() {
           addTask={addTask}
           editTask={editTask}
           taskToEdit={taskToEdit}
+        />
+
+        <DeleteConfirmModal
+          show={showDeleteModal}
+          handleClose={handleCloseDeleteModal}
+          handleConfirm={executeDelete}
+          taskName={taskToDelete ? taskToDelete.name : ""}
         />
       </Container>
     </div>
